@@ -1,0 +1,238 @@
+<style>
+  body {
+    margin: 0px;
+  }
+  
+  .circle {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: grid;
+    place-content: center;
+    background: grey;
+    color: white;
+    transform: translate(-50%, -50%)
+  }
+  
+  .mover {
+    position: fixed;
+    z-index: 10;
+    border: 3px solid black;
+  }
+  
+  .red {
+    background: red;
+  }
+
+  .blue {
+    background: blue;
+  }
+
+</style>
+
+<div q="1" x="400" y="10">
+  <div class="circle" style="background: red;"></div>
+</div>
+
+<div q="1" x="300" y="200">
+  <div class="circle" style="background: blue;"></div>
+</div>
+
+
+<div q="-1" x="200" y="200">
+  <div class="circle" style="background: blue;"></div>
+</div>
+
+<!-- <div   q="1" x="200" y="240" bounce=".8">
+<img 
+  
+  width="150px"
+  src="https://media.4-paws.org/1/e/d/6/1ed6da75afe37d82757142dc7c6633a532f53a7d/VIER%20PFOTEN_2019-03-15_001-2886x1999-1920x1330.jpg">
+</div> -->
+
+<script defer type="module">
+  const attributes = ["q", "func", "x", "y", "ax", "ay", "vx", "vy"]
+  const mags = document.querySelectorAll(`[q]`);
+  const all = [];
+
+  attributes.forEach(x => {
+    all.push(...document.querySelectorAll(`[${x}]`))
+  })
+
+  let count = 0;
+  for (const el of all) {
+    if (el.uid !== undefined) continue;
+    const styles = window.getComputedStyle(el);
+    let trans = styles.getPropertyValue('transform');
+    if (trans === "none") trans = "matrix(1, 0, 0, 1, 0, 0)"
+    const numbers = trans
+      .slice(7, -1)
+      .split(",")
+      .map(Number);
+
+    if (el.hasAttribute("q")) el.q = Number(el.getAttribute("q"));
+    else el.q = 0;
+    // else if (el.matches("[mover]")) el.q = -1;
+
+    if (el.hasAttribute("func")) el.func = new Function("el", "w", "h", "mouseX", "mouseY", "step", el.getAttribute("func"));
+ 
+    
+    if (el.hasAttribute("x")) numbers[4] = Number(el.getAttribute("x"));
+    if (el.hasAttribute("y")) numbers[5] = Number(el.getAttribute("y"));
+
+    el.ax = el.hasAttribute("ax") ? Number(el.getAttribute("ax")) : 0;
+    el.ay = el.hasAttribute("ay") ? Number(el.getAttribute("ay")) : 0;
+    el.vx = el.hasAttribute("vx") ? Number(el.getAttribute("vx")) : 0;
+    el.vy = el.hasAttribute("vy") ? Number(el.getAttribute("vy")) : 0;
+    el.x = numbers[4]; // plus width/2
+    el.y = numbers[5]; // plus height/2
+    
+    el.bounce = el.hasAttribute("bounce") ? Number(el.getAttribute("bounce")) : 1/2;
+
+    el.style.position = "fixed";
+    el.style.transform = `matrix(1, 0, 0, 1, ${numbers[4]}, ${numbers[5]})`
+
+    const { width, height } = el.getBoundingClientRect();
+    el.width = width;
+    el.height = height;
+    el.uid = count;
+    count++;
+  }
+
+  function getAngle(cx, cy, ex, ey) {
+    var dy = ey - cy;
+    var dx = ex - cx;
+    var theta = Math.atan2(dy, dx); // range (-PI, PI]
+    // theta *= 180 / Math.PI; // rads to degs, range (-180, 180]
+    //if (theta < 0) theta = 360 + theta; // range [0, 360)
+    return theta;
+  }
+
+  const G = 1;
+  const SOFTENING = 10;
+  
+  function calculateForce(index) {
+    const el = all[index];
+    let x0 = el.x;
+    let y0 = el.y;
+    
+    let fx = 0;
+    let fy = 0;
+    // could be sped up with symmetry
+    for (let i = 0; i < mags.length; i++) {
+      if (mags[i].uid === el.uid) continue;
+      let x1 = mags[i].x;
+      let y1 = mags[i].y;
+      const dSquared = (x1 - x0)**2 + (y1 - y0)**2 + SOFTENING**2
+
+      const q0 = el.q; // get from redness/blueness
+      const q1 = mags[i].q; // get from redness/blueness
+
+      // why are these different?
+      
+      // const f = G*mag0*mag1/dSquared;
+      // const a = getAngle(x0, y0, x1, y1);
+      // fx += f*Math.cos(a);
+      // fy += f*Math.sin(a);
+      
+      const dx = x1 - x0;
+      const dy = y1 - y0;
+      const inv_r2 = (dx**2 + dy**2 + SOFTENING**2)**(-3/2);
+
+      let attract = 1;
+      if (q0 < 0 && q1 < 0) attract = -1;
+      if (q0 > 0 && q1 > 0) attract = -1;
+
+      fx += G * Math.abs(q0)*Math.abs(q1) * dx * inv_r2 * attract;
+      fy += G * Math.abs(q0)*Math.abs(q1) * dy * inv_r2 * attract;
+    }
+
+    return [fx, fy];
+  } 
+
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  function bounceOffWalls(el, collisionScale) {
+      // bounce off walls
+      if (el.x < 0) {
+        el.vx = el.vx < 0 ? el.vx*-collisionScale : el.vx*collisionScale;
+        el.ax = 0;
+      }
+    
+      if (el.x > w - el.width) {
+        el.vx = el.vx > 0 ? el.vx*-collisionScale : el.vx*collisionScale;
+        el.ax = 0;
+      }
+
+      if (el.y < 0) {
+        el.vy = el.vy < 0 ? el.vy*-collisionScale : el.vy*collisionScale;
+        el.ay = 0;
+      }
+
+      if (el.y > h - el.height) {
+        el.vy = el.vy > 0 ? el.vy*-collisionScale : el.vy*collisionScale;
+        el.ay = 0;
+      }
+      
+  }
+
+  let mouseX = 0;
+  let mouseY = 0;
+  let stepCount = 0;
+  function step() {
+    for (let i = 0; i < all.length; i++) {
+      const el = all[i];
+      let [fx, fy] = calculateForce(i)
+
+      el.ax += fx;
+      el.ay += fy;
+
+      // full step should I do half step
+      el.vx += el.ax * 1/2;
+      el.vy += el.ay * 1/2;
+
+      // move
+      el.x += el.vx;
+      el.y += el.vy;
+
+      if (el.func) el.func(el, w, h, mouseX, mouseY, stepCount);
+      el.style.transform = `matrix(1, 0, 0, 1, ${el.x}, ${el.y})`
+
+      
+      bounceOffWalls(el, el.bounce)
+      
+      // half step
+      el.vx += el.ax * 1/2;
+      el.vy += el.ay * 1/2;
+
+    }
+
+    // funcs.forEach(el => {
+    //   el.func(el, w, h, mouseX, mouseY);
+    //   bounceOffWalls(el, 1);
+    //   el.style.transform = `matrix(1, 0, 0, 1, ${el.x}, ${el.y})`
+    // })
+
+    stepCount++;
+  }
+
+  document.addEventListener("mousemove", e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  })
+
+  setInterval(step, 1000/30)
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
