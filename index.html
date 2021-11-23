@@ -5,7 +5,7 @@
   
   .circle {
     /* border-radius: 50%; */
-    width: 400px;
+    width: 100px;
     height: 50px;
     display: grid;
     place-content: center;
@@ -31,15 +31,12 @@
 </style>
 
 <div 
-  q="1" 
   x="100" 
   y="10"  
-  on:click="el.vx = 2" 
-  on:keyheld:ArrowRight="el.vx = 2" 
-  on:keypress:ArrowUp="el.vx = 2" 
-  collidable
+  bounce="0.2"
+  friction-x=".01"
   func="
-    el.ay = 1; 
+    el.ay = .4; 
   
     if (heldKeys['ArrowRight']) {
   
@@ -53,15 +50,13 @@
 
 
     if (pressedKeys['ArrowUp'] && el.vy < 0.1) {
-      el.vy = -20;
+      el.vy = -50;
     }
-  " 
-  bounce="0.2"
-  friction-x=".3">
+  ">
   <img width="100px" src="https://hips.hearstapps.com/countryliving.cdnds.net/17/47/1511194376-cavachon-puppy-christmas.jpg"/>
 </div>
 
-<div x="300" vx="-2" y="300" bounce="1">
+<div x="300" vx="-2" y="500" bounce="1" func="if (el.x < -el.width) { el.x = w }">
   <div class="circle" style="background: blue;"></div>
 </div>
 
@@ -117,8 +112,9 @@
     el.frictionX = el.hasAttribute("friction-x") ? Number(el.getAttribute("friction-x")) : ( el.frictionX ?? 0);
     el.frictionY = el.hasAttribute("friction-y") ? Number(el.getAttribute("friction-y")) : ( el.frictionY ?? 0);
 
-    el.name = el.hasAttribute("name") ? el.getAttribute("name") : "";
-    el.collidable = el.hasAttribute("collidable");
+    el.collide = el.hasAttribute("collide") 
+      ? el.getAttribute("collide").split(" ")
+      : ["top-wall", "left-wall", "bottom-wall", "right-wall"];
 
     el.style.position = "fixed";
     el.style.transform = `matrix(1, 0, 0, 1, ${numbers[4]}, ${numbers[5]})`
@@ -229,27 +225,29 @@
   const h = window.innerHeight;
 
   function bounceOffWalls(el) {
+
+
       const collisionScale = el.bounce
       // bounce off walls
-      if (el.x < 0) {
+      if (el.x < 0 && el.collide.includes("left-wall")) {
         el.x = 0;
         el.vx = el.vx < 0 ? el.vx*-collisionScale : el.vx*collisionScale;
         el.ax = 0;
       }
     
-      if (el.x > w - el.width) {
+      if (el.x > w - el.width && el.collide.includes("right-wall")) {
         el.x = w - el.width;
         el.vx = el.vx > 0 ? el.vx*-collisionScale : el.vx*collisionScale;
         el.ax = 0;
       }
 
-      if (el.y < 0) {
+      if (el.y < 0 && el.collide.includes("top-wall")) {
         el.y = 0;
         el.vy = el.vy < 0 ? el.vy*-collisionScale : el.vy*collisionScale;
         el.ay = 0;
       }
 
-      if (el.y > h - el.height) {
+      if (el.y > h - el.height && el.collide.includes("bottom-wall")) {
         el.y = h - el.height;
         el.vy = el.vy > 0 ? el.vy*-collisionScale : el.vy*collisionScale;
         el.ay = 0;

@@ -1,0 +1,39 @@
+
+<div 
+  q="1" 
+  x="100" 
+  y="10"  
+  on:click="el.vx = 2" 
+  on:keyheld:ArrowRight="el.vx = 2" 
+  on:keypress:ArrowUp="el.vx = 2" 
+  collidable
+  func="
+    el.ay = 1; 
+    // el.vx = el.vx*.8
+  
+    if (heldKeys['ArrowRight']) {
+  
+      el.vx = 5;
+    }
+
+    if (heldKeys['ArrowLeft']) {
+  
+      el.vx = -5;
+    }
+
+
+    if (pressedKeys['ArrowUp'] && el.vy < 0.1) {
+      el.vy = -20;
+    }
+  " 
+  bounce="0.2"
+  friction-x=".3">
+  <img width="100px" src="https://hips.hearstapps.com/countryliving.cdnds.net/17/47/1511194376-cavachon-puppy-christmas.jpg"/>
+</div>
+
+<div x="300" vx="-2" y="300" bounce="1">
+  <div class="circle" style="background: blue;"></div>
+</div>
+
+
+how should friction work, from contact with surface or as property of object

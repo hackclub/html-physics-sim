@@ -13,6 +13,8 @@ Properties:
 - friction
 	- friction-x (0 - 1)
 	- friction-y (0 - 1)
+- collidable
+- unwalled
 - func
 	- scope contains
 		- el
