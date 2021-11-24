@@ -3,38 +3,22 @@
     margin: 0px;
   }
   
-  .circle {
-    /* border-radius: 50%; */
-    width: 100px;
+  .platform {
     height: 50px;
     display: grid;
     place-content: center;
-    background: grey;
-    color: white;
-    /* transform: translate(-50%, -50%) */
-  }
-  
-  .mover {
-    position: fixed;
-    z-index: 10;
-    border: 3px solid black;
-  }
-  
-  .red {
-    background: red;
-  }
-
-  .blue {
     background: blue;
+    color: white;
   }
 
 </style>
 
 <div 
   x="100" 
-  y="10"  
+  y="450"  
   bounce="0.2"
-  friction-x=".01"
+  friction-x=".3"
+  collide="bottom-wall left-wall right-wall platform"
   func="
     el.ay = .4; 
   
@@ -44,88 +28,133 @@
     }
 
     if (heldKeys['ArrowLeft']) {
-  
       el.vx = -5;
     }
 
+    if (collided['platform']) {
+      console.log('hit it')
+    }
 
-    if (pressedKeys['ArrowUp'] && el.vy < 0.1) {
-      el.vy = -50;
+    if (el.y < 0) {
+      endgame()
+      alert('You won!')
+    }
+
+    if (pressedKeys['ArrowUp'] && Math.abs(el.vy) < 0.5) {
+      el.vy = -15;
     }
   ">
   <img width="100px" src="https://hips.hearstapps.com/countryliving.cdnds.net/17/47/1511194376-cavachon-puppy-christmas.jpg"/>
 </div>
 
-<div x="300" vx="-2" y="500" bounce="1" func="if (el.x < -el.width) { el.x = w }">
-  <div class="circle" style="background: blue;"></div>
+<div 
+  x="1000" 
+  vx="-2" 
+  y="550" 
+  bounce="1"
+  class="platform"
+  style="width: 200px;">
+</div>
+
+<div 
+  x="300" 
+  vx="-1.3" 
+  y="350"
+  class="platform" 
+  collide=""
+  func="if (el.x < -el.width) { el.x = w }"
+  style="width: 300px;">
+</div>
+
+<div 
+  x="300" 
+  vx="-2.4" 
+  y="150" 
+  bounce="1"
+  class="platform" 
+  style="width: 200px;">
 </div>
 
 <script defer type="module">
   // const events = document.querySelectorAll(`[on:]`);
-  // console.log(events);
 
-  
   const attributes = ["q", "func", "x", "y", "ax", "ay", "vx", "vy"]
-  const mags = document.querySelectorAll(`[q]`);
-  const collidables = document.querySelectorAll(`[collidable]`);
   const all = attributes.reduce((acc, cur) => [
     ...acc,
     ...document.querySelectorAll(`[${cur}]`)
   ], []);
+  setup(all);
+  const mags = document.querySelectorAll(`[q]`);
 
-  let count = 0;
-  for (const el of all) {
-    if (el.uid !== undefined) continue;
-    const styles = window.getComputedStyle(el);
-    let trans = styles.getPropertyValue('transform');
-    if (trans === "none") trans = "matrix(1, 0, 0, 1, 0, 0)"
-    const numbers = trans
-      .slice(7, -1)
-      .split(",")
-      .map(Number);
+  function setup(all) {
+    let count = 0;
+    for (const el of all) {
+      if (el.uid !== undefined) continue;
+      const styles = window.getComputedStyle(el);
+      let trans = styles.getPropertyValue('transform');
+      if (trans === "none") trans = "matrix(1, 0, 0, 1, 0, 0)"
+      const numbers = trans
+        .slice(7, -1)
+        .split(",")
+        .map(Number);
 
-    if (el.hasAttribute("q")) el.q = Number(el.getAttribute("q"));
-    else el.q = 0;
-    // else if (el.matches("[mover]")) el.q = -1;
+      if (el.hasAttribute("q")) el.q = Number(el.getAttribute("q"));
+      else el.q = 0;
+      // else if (el.matches("[mover]")) el.q = -1;
 
-    if (el.hasAttribute("func")) el.func = new Function("el", "w", "h", "mouseX", "mouseY", "step", "heldKeys", "pressedKeys", el.getAttribute("func"));
-   
-    
-    if (el.hasAttribute("x")) numbers[4] = Number(el.getAttribute("x"));
-    if (el.hasAttribute("y")) numbers[5] = Number(el.getAttribute("y"));
+      if (el.hasAttribute("func")) el.func = new Function(
+        "el", 
+        "w", 
+        "h", 
+        "mouseX", 
+        "mouseY", 
+        "step", 
+        "heldKeys", 
+        "pressedKeys",
+        "collided", 
+        "endgame",
+        el.getAttribute("func")
+      );
+     
+      
+      if (el.hasAttribute("x")) numbers[4] = Number(el.getAttribute("x"));
+      if (el.hasAttribute("y")) numbers[5] = Number(el.getAttribute("y"));
 
-    el.ax = el.hasAttribute("ax") ? Number(el.getAttribute("ax")) : 0;
-    el.ay = el.hasAttribute("ay") ? Number(el.getAttribute("ay")) : 0;
-    el.vx = el.hasAttribute("vx") ? Number(el.getAttribute("vx")) : 0;
-    el.vy = el.hasAttribute("vy") ? Number(el.getAttribute("vy")) : 0;
-    el.x = numbers[4]; // plus width/2
-    el.y = numbers[5]; // plus height/2
-    
-    el.bounce = el.hasAttribute("bounce") ? Number(el.getAttribute("bounce")) : 1/2;
-    if (el.hasAttribute("friction")) {
-       el.frictionX = Number(el.getAttribute("friction"));
-       el.frictionY = Number(el.getAttribute("friction"));
-    } else {
-      el.frictionX = 0;
-      el.frictionY = 0;
+      el.ax = el.hasAttribute("ax") ? Number(el.getAttribute("ax")) : 0;
+      el.ay = el.hasAttribute("ay") ? Number(el.getAttribute("ay")) : 0;
+      el.vx = el.hasAttribute("vx") ? Number(el.getAttribute("vx")) : 0;
+      el.vy = el.hasAttribute("vy") ? Number(el.getAttribute("vy")) : 0;
+      el.x = numbers[4]; // plus width/2
+      el.y = numbers[5]; // plus height/2
+      
+      el.bounce = el.hasAttribute("bounce") ? Number(el.getAttribute("bounce")) : 1/2;
+      if (el.hasAttribute("friction")) {
+         el.frictionX = Number(el.getAttribute("friction"));
+         el.frictionY = Number(el.getAttribute("friction"));
+      } else {
+        el.frictionX = 0;
+        el.frictionY = 0;
+      }
+      el.frictionX = el.hasAttribute("friction-x") ? Number(el.getAttribute("friction-x")) : ( el.frictionX ?? 0);
+      el.frictionY = el.hasAttribute("friction-y") ? Number(el.getAttribute("friction-y")) : ( el.frictionY ?? 0);
+
+      el.collide = el.hasAttribute("collide")
+        ? el.getAttribute("collide") === "" ? [] : el.getAttribute("collide").split(" ")
+        : ["top-wall", "left-wall", "bottom-wall", "right-wall"];
+
+      el.floor = null;
+
+      el.style.position = "fixed";
+      el.style.transform = `matrix(1, 0, 0, 1, ${numbers[4]}, ${numbers[5]})`
+
+      const { width, height } = el.getBoundingClientRect();
+      el.width = width;
+      el.height = height;
+
+      el.uid = count;
+      
+      count++;
     }
-    el.frictionX = el.hasAttribute("friction-x") ? Number(el.getAttribute("friction-x")) : ( el.frictionX ?? 0);
-    el.frictionY = el.hasAttribute("friction-y") ? Number(el.getAttribute("friction-y")) : ( el.frictionY ?? 0);
-
-    el.collide = el.hasAttribute("collide") 
-      ? el.getAttribute("collide").split(" ")
-      : ["top-wall", "left-wall", "bottom-wall", "right-wall"];
-
-    el.style.position = "fixed";
-    el.style.transform = `matrix(1, 0, 0, 1, ${numbers[4]}, ${numbers[5]})`
-
-    const { width, height } = el.getBoundingClientRect();
-    el.width = width;
-    el.height = height;
-
-    el.uid = count;
-    
-    count++;
   }
 
   function getAngle(cx, cy, ex, ey) {
@@ -186,10 +215,10 @@
              el0.height + el0.y > el1.y;
   }
 
-  function bounceOffCollidables(el0, el1) { // WIP
+  function bounceOffCollidable(el0, el1) { // WIP
     // bounce off walls
     
-    if (!haveCollided(el0, el1)) return;
+    if (!haveCollided(el0, el1)) return false;
     
     const center = el => [
       el.x + el.width/2,
@@ -199,25 +228,32 @@
     const [ el0cx, el0cy ] = center(el0);
     const [ el1cx, el1cy ] = center(el1);
 
-    if (el0cx > el1cx) {
-      el0.x = el1.x + el1.width;
-      el0.vx = el0.vx * (el0.vx*el1.vx < 0 ? -1 : 1)*el0.bounce;
-      el0.ax = 0;
+    // if (el0cx > el1cx) {
+    //   el0.x = el1.x + el1.width;
+    //   el0.vx = el0.vx * (el0.vx*el1.vx < 0 ? -1 : 1)*el0.bounce;
+    //   el0.ax = 0;
+    // }
 
-      el1.x = el0.x - el1.width;
-      el1.vx = el1.vx * (el0.vx*el1.vx < 0 ? 1 : -1)*el1.bounce;
-      el1.ax = 0;
-    }
+    // if (el0cx < el1cx) {
+    //   el0.x = el1.x - el0.width;
+    //   el0.vx = el0.vx * (el0.vx*el1.vx < 0 ? -1 : 1)*el0.bounce;
+    //   el0.ax = 0;
+    // }
 
     if (el0cy > el1cy) {
       el0.y = el1.y + el1.height;
       el0.vy = el0.vy * (el0.vy*el1.vy < 0 ? -1 : 1)*el0.bounce;
       el0.ay = 0;
-
-      el1.y = el0.y - el1.height;
-      el1.vy = el1.vy * (el0.vy*el1.vy < 0 ? 1 : -1)*el1.bounce;
-      el1.ay = 0;
+      el0.floor = el1;
     }
+
+    if (el0cy < el1cy) {
+      el0.y = el1.y - el0.height;
+      el0.vy = el0.vy * (el0.vy*el1.vy < 0 ? -1 : 1)*el0.bounce;
+      el0.ay = 0;
+    }
+
+    return true;
 
   }
 
@@ -251,6 +287,8 @@
         el.y = h - el.height;
         el.vy = el.vy > 0 ? el.vy*-collisionScale : el.vy*collisionScale;
         el.ay = 0;
+
+        // el.floor = null;
       }
       
   }
@@ -258,52 +296,67 @@
   let mouseX = 0;
   let mouseY = 0;
   let stepCount = 0;
-  const heldKeys = {}
-  let pressedKeys = {};
+  const heldKeys = {}; // TODO: should be set
+  const pressedKeys = {}; // TODO: should be set
+  const collided = {}; // TODO: should be set
   
   function step() {
     for (let i = 0; i < all.length; i++) {
       const el = all[i];
       let [fx, fy] = calculateForce(i)
 
-      el.ax += fx;
-      el.ay += fy;
+      el.ax += fx //+ (el.floor ? el.floor.ax : 0);
+      el.ay += fy //+ (el.floor ? el.floor.ay : 0);
 
       // full step should I do half step
       el.vx += el.ax * 1/2 - el.vx*el.frictionX;
       el.vy += el.ay * 1/2 - el.vy*el.frictionY;
 
       // move
-      el.x += el.vx;
-      el.y += el.vy;
+      el.x += el.vx //+ (el.floor ? el.floor.vx : 0);
+      el.y += el.vy //+ (el.floor ? el.floor.vy : 0);
 
-      if (el.func) el.func(el, w, h, mouseX, mouseY, stepCount, heldKeys, pressedKeys);
-      for (let evt in el.events) {
-        
-      }
+
       el.style.transform = `matrix(1, 0, 0, 1, ${el.x}, ${el.y})`
 
       
       bounceOffWalls(el)
+      const walls = ["top-wall", "left-wall", "bottom-wall", "right-wall"];
+
+      const queryTerm = el.collide.length > 0 
+        ? el.collide.filter(x => !walls.includes(x)).map(x => `.${x}`).join(" ")
+        : null;
+
+      const collidables = queryTerm ? document.querySelectorAll(queryTerm) : [];
+      collidables.forEach(x => {
+
+        const hasCollided = bounceOffCollidable(el, x);
+        // if (hasCollided) 
+
+      })
       
       // half step
       el.vx += el.ax * 1/2 - el.vx*el.frictionX;
       el.vy += el.ay * 1/2 - el.vy*el.frictionY;
+
+      if (el.func) el.func(
+        el, 
+        w, 
+        h, 
+        mouseX, 
+        mouseY, 
+        stepCount, 
+        heldKeys, 
+        pressedKeys, 
+        collided,
+        endgame
+      );
 
     }
 
     for (let key in pressedKeys) {
       if (heldKeys[key]) pressedKeys[key] = false;
     }
-
-    
-    // for (let i = 0; i < collidables.length; i++) {
-    //   for (let j = i+1; j < collidables.length; j++) {
-    //     let el0 = collidables[i];
-    //     let el1 = collidables[j];
-    //     bounceOffCollidables(el0, el1);
-    //   }
-    // }
 
     stepCount++;
   }
@@ -325,11 +378,17 @@
   document.addEventListener("keyup", e => {
     const key = e.key;
     delete heldKeys[key];
+    delete pressedKeys[key];
   })
 
-  // setInterval(step, 1000/20)
+  // setInterval(step, 1000)
+
+  let gameover = false;
+  const endgame = () => { gameover = true };
 
   const animate = () => {
+    if (gameover) return;
+
     step();
     window.requestAnimationFrame(animate);
   }
