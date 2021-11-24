@@ -1,4 +1,4 @@
-# HTML with Physics! (BETA)
+# HTML with Physics! (alpha)
 
 [Live Demo](https://hackclub.github.io/live-editor/?file=recF3hPxVFpkYClll)
 
@@ -42,7 +42,7 @@ Properties:
 - heldKeys
 - pressedKeys
 
-Here is an example game made with the libary.
+Here is an example game made with the library.
 
 https://user-images.githubusercontent.com/27078897/143150239-34d2af69-5837-4c19-a833-7461508dabff.mov
 
