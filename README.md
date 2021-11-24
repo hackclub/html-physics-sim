@@ -20,11 +20,10 @@ Properties:
 - ay (number, can be negative)
 - q (number, can be negative)
 - bounce (0 - 1)
-- friction
+- friction 
 	- friction-x (0 - 1)
 	- friction-y (0 - 1)
-- collidable
-- unwalled
+- collide (Takes list of classes it collides with and walls which can be left-wall, right-wall, top-wall, bottom-wall. If blank will default to all walls.)
 - func
 
 `func` is a special attribute that takes a JavaScript function that will run ever game loop. The scope of the function contains:
