@@ -45,7 +45,7 @@ Here is an example game made with the libary.
 
 https://user-images.githubusercontent.com/27078897/143150239-34d2af69-5837-4c19-a833-7461508dabff.mov
 
-Example:
+Example ([live demo](hackclub.github.io/live-editor/?file=recF3hPxVFpkYClll)):
 
 ```html
 <script defer type="module" src="https://hackclub.github.io/html-physics-sim/initialize.js"></script>
