@@ -1,5 +1,7 @@
 # HTML with Physics! (BETA)
 
+[Live Demo](https://hackclub.github.io/live-editor/?file=recF3hPxVFpkYClll)
+
 This is a tiny little game engine to spice up your HTML. Add this script to the top of your page:
 
 ```html
@@ -45,7 +47,7 @@ Here is an example game made with the libary.
 
 https://user-images.githubusercontent.com/27078897/143150239-34d2af69-5837-4c19-a833-7461508dabff.mov
 
-Example ([live demo](hackclub.github.io/live-editor/?file=recF3hPxVFpkYClll)):
+Example:
 
 ```html
 <script defer type="module" src="https://hackclub.github.io/html-physics-sim/initialize.js"></script>
