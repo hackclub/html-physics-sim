@@ -1,4 +1,12 @@
-# HTML with Physics!
+# HTML with Physics! (BETA)
+
+This is a tiny little game engine to spice up your HTML. Add this script to the top of your page:
+
+```html
+<script defer type="module" src="https://hackclub.github.io/html-physics-sim/initialize.js"></script>
+```
+
+After you add this script to your page you can add these properties to any element on that page.
  
 Properties:
 
@@ -16,40 +24,98 @@ Properties:
 - collidable
 - unwalled
 - func
-	- scope contains
-		- el
-			- x
-			- y
-			- vx
-			- vy
-			- ax
-			- ay
-			- width
-			- height
-		- w
-		- h
-		- heldKeys
-		- pressedKeys
+
+`func` is a special attribute that takes a JavaScript function that will run ever game loop. The scope of the function contains:
+
+- el (the current el with the properties below)
+	- x
+	- y
+	- vx
+	- vy
+	- ax
+	- ay
+	- width
+	- height
+- w (the width of the page)
+- h (the height of the page)
+- heldKeys
+- pressedKeys
+
+Here is an example game made with the libary.
+
+![example game]()
 
 Example:
 ```
-<div style="">
+<style>
+  body {
+    margin: 0px;
+  }
+  
+  .platform {
+    height: 50px;
+    display: grid;
+    place-content: center;
+    background: blue;
+    color: white;
+  }
 
+</style>
+
+<div 
+  x="100" 
+  y="450"  
+  bounce="0.2"
+  friction-x=".3"
+  collide="bottom-wall left-wall right-wall platform"
+  func="
+    el.ay = .4; 
+  
+    if (heldKeys['ArrowRight']) {
+      el.vx = 5;
+    }
+
+    if (heldKeys['ArrowLeft']) {
+      el.vx = -5;
+    }
+
+    if (el.y < 0) {
+      endgame()
+      alert('You won!')
+    }
+
+    if (pressedKeys['ArrowUp'] && Math.abs(el.vy) < 0.5) {
+      el.vy = -15;
+    }
+  ">
+  <img width="100px" src="https://hips.hearstapps.com/countryliving.cdnds.net/17/47/1511194376-cavachon-puppy-christmas.jpg"/>
+</div>
+
+<div 
+  x="1000" 
+  vx="-2" 
+  y="550" 
+  bounce="1"
+  class="platform"
+  style="width: 200px;">
+</div>
+
+<div 
+  x="300" 
+  vx="-1.3" 
+  y="350"
+  class="platform" 
+  collide=""
+  func="if (el.x < -el.width) { el.x = w }"
+  style="width: 300px;">
+</div>
+
+<div 
+  x="300" 
+  vx="-2.4" 
+  y="150" 
+  bounce="1"
+  class="platform" 
+  style="width: 200px;">
 </div>
 ```
-
-or
-
-```
-<div>
-	<img src=""/>
-</div>
-```
-
-
-maybe:
-
-on:click="el.vx = 2" 
-on:keyheld:ArrowRight="el.vx = 2" 
-on:keypress:ArrowUp="el.vx = 2" 
-collidable

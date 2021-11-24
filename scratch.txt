@@ -37,3 +37,11 @@
 
 
 how should friction work, from contact with surface or as property of object
+
+
+maybe:
+
+on:click="el.vx = 2" 
+on:keyheld:ArrowRight="el.vx = 2" 
+on:keypress:ArrowUp="el.vx = 2" 
+collidable
