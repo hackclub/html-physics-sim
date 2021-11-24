@@ -46,7 +46,10 @@ Here is an example game made with the libary.
 ![example game]()
 
 Example:
-```
+
+```html
+<script defer type="module" src="https://hackclub.github.io/html-physics-sim/initialize.js"></script>
+
 <style>
   body {
     margin: 0px;
