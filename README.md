@@ -24,9 +24,9 @@ Properties:
 	- friction-x (0 - 1)
 	- friction-y (0 - 1)
 - collide (Takes list of classes it collides with and walls which can be left-wall, right-wall, top-wall, bottom-wall. If blank will default to all walls.)
-- func
+- update
 
-`func` is a special attribute that takes a JavaScript function that will run ever game loop. The scope of the function contains:
+`update` is a special attribute that takes a JavaScript function that will run ever game loop. The scope of the function contains:
 
 - el (the current el with the properties below)
 	- x
@@ -72,7 +72,7 @@ Example:
   bounce="0.2"
   friction-x=".3"
   collide="bottom-wall left-wall right-wall platform"
-  func="
+  update="
     el.ay = .4; 
   
     if (heldKeys['ArrowRight']) {
@@ -110,7 +110,7 @@ Example:
   y="350"
   class="platform" 
   collide=""
-  func="if (el.x < -el.width) { el.x = w }"
+  update="if (el.x < -el.width) { el.x = w }"
   style="width: 300px;">
 </div>
 

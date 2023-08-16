@@ -1,6 +1,6 @@
 // const events = document.querySelectorAll(`[on:]`);
 
-const attributes = ["q", "func", "x", "y", "ax", "ay", "vx", "vy"]
+const attributes = ["q", "update", "x", "y", "ax", "ay", "vx", "vy"]
 const all = attributes.reduce((acc, cur) => [
   ...acc,
   ...document.querySelectorAll(`[${cur}]`)
@@ -24,7 +24,7 @@ function setup(all) {
     else el.q = 0;
     // else if (el.matches("[mover]")) el.q = -1;
 
-    if (el.hasAttribute("func")) el.func = new Function(
+    if (el.hasAttribute("update")) el.update = new Function(
       "el", 
       "w", 
       "h", 
@@ -35,7 +35,7 @@ function setup(all) {
       "pressedKeys",
       "collided", 
       "endgame",
-      el.getAttribute("func")
+      el.getAttribute("update")
     );
    
     
@@ -261,7 +261,7 @@ function step() {
     el.vx += el.ax * 1/2 - el.vx*el.frictionX;
     el.vy += el.ay * 1/2 - el.vy*el.frictionY;
 
-    if (el.func) el.func(
+    if (el.update) el.update(
       el, 
       w, 
       h, 

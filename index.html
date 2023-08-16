@@ -19,7 +19,7 @@
   bounce="0.2"
   friction-x=".3"
   collide="bottom-wall left-wall right-wall platform"
-  func="
+  update="
     el.ay = .4; 
   
     if (heldKeys['ArrowRight']) {
@@ -57,7 +57,7 @@
   y="350"
   class="platform" 
   collide=""
-  func="if (el.x < -el.width) { el.x = w }"
+  update="if (el.x < -el.width) { el.x = w }"
   style="width: 300px;">
 </div>
 
